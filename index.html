@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch/dist/geosearch.css" />
+
+    <title>Bbox Extractor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Interactive Bounding Box Extractor</h1>
+            <nav class="nav">
+                <a href="#">Home</a>
+                <!-- <a href="#">Features</a>
+                <a href="#">Docs</a>
+                <a href="#">Support</a> -->
+            </nav>
+        </header>
+
+        <main class="content">
+            <div class="map-container">
+                <div id="map">
+                    <div id="leafletCoordinates">Lat: 47.70, Lon: 9.15</div>
+                </div>
+            </div>
+            <div class="controls">
+
+                <h3 id="coordinateText"><strong>Coordinates (WGS84)</strong>: </h3>
+                <button class="btn" id="copyButton">Copy Coordinates</button>
+
+                <h2>More</h2>
+                <button class="btn geojson">Upload GeoJSON</button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024. str.uctuer GmbH, All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/leaflet-geosearch/dist/bundle.min.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

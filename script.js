@@ -1,14 +1,3 @@
-// Function to round up a number to a specified number of decimal places
-function roundUp(num, decimalPlaces) {
-  var factor = Math.pow(10, decimalPlaces);
-  return Math.ceil(num * factor) / factor;
-}
-
-function roundDown(num, decimalPlaces) {
-  var factor = Math.pow(10, decimalPlaces);
-  return Math.floor(num * factor) / factor;
-}
-
 // Add OpenStreetMap tile layer
 var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
@@ -43,12 +32,12 @@ map.on("mousemove", function (e) {
   var lng = e.latlng.lng.toFixed(2);
   coordDiv.innerHTML = `Lat: ${lat}, Lng: ${lng}`;
 });
-
 // Create a new pane for the grid layer
 map.createPane("gridPane");
-map.getPane("gridPane").style.zIndex = 650; // Set a higher zIndex for the grid
 
-// Custom grid layer to draw 0.1° lines
+map.getPane("gridPane").style.zIndex = 1000;
+
+// Custom grid layer to draw major and minor grids
 var GridLayer = L.GridLayer.extend({
   createTile: function (coords) {
     var tile = document.createElement("canvas");
@@ -57,20 +46,26 @@ var GridLayer = L.GridLayer.extend({
     tile.height = size.y;
 
     var ctx = tile.getContext("2d");
+
+    // Major grid settings
+    var majorStep = 0.1;
     ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.65;
 
     var tileBounds = this._tileCoordsToBounds(coords);
     var latRange = [tileBounds.getSouth(), tileBounds.getNorth()];
     var lngRange = [tileBounds.getWest(), tileBounds.getEast()];
 
-    var step = 0.1; // Step for grid lines in degrees
+    // Minor grid settings
+    var minorStep = majorStep / 10;
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.3)"; // Lighter stroke for minor grids
+    ctx.lineWidth = 0.4;
 
-    // Draw vertical lines (longitude)
+    // Draw minor vertical lines (longitude)
     for (
-      var lng = Math.ceil(lngRange[0] / step) * step;
+      var lng = Math.ceil(lngRange[0] / minorStep) * minorStep;
       lng < lngRange[1];
-      lng += step
+      lng += minorStep
     ) {
       var x = ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * size.x;
       ctx.beginPath();
@@ -79,11 +74,11 @@ var GridLayer = L.GridLayer.extend({
       ctx.stroke();
     }
 
-    // Draw horizontal lines (latitude)
+    // Draw minor horizontal lines (latitude)
     for (
-      var lat = Math.ceil(latRange[0] / step) * step;
+      var lat = Math.ceil(latRange[0] / minorStep) * minorStep;
       lat < latRange[1];
-      lat += step
+      lat += minorStep
     ) {
       var y = ((latRange[1] - lat) / (latRange[1] - latRange[0])) * size.y;
       ctx.beginPath();
@@ -91,6 +86,37 @@ var GridLayer = L.GridLayer.extend({
       ctx.lineTo(size.x, y);
       ctx.stroke();
     }
+
+    // Major grid settings
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)"; // Darker stroke for major grids
+    ctx.lineWidth = 0.65;
+
+    // Draw major vertical lines (longitude)
+    for (
+      var lng = Math.ceil(lngRange[0] / majorStep) * majorStep;
+      lng < lngRange[1];
+      lng += majorStep
+    ) {
+      var x = ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * size.x;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, size.y);
+      ctx.stroke();
+    }
+
+    // Draw major horizontal lines (latitude)
+    for (
+      var lat = Math.ceil(latRange[0] / majorStep) * majorStep;
+      lat < latRange[1];
+      lat += majorStep
+    ) {
+      var y = ((latRange[1] - lat) / (latRange[1] - latRange[0])) * size.y;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(size.x, y);
+      ctx.stroke();
+    }
+
     return tile;
   },
 });
@@ -98,6 +124,7 @@ var GridLayer = L.GridLayer.extend({
 // Assign the grid layer to the new pane
 var grid = new GridLayer({ pane: "gridPane" });
 map.addLayer(grid);
+
 
 // Add GeoSearch control
 const provider = new window.GeoSearch.OpenStreetMapProvider();
@@ -133,10 +160,31 @@ var drawControl = new L.Control.Draw({
 });
 map.addControl(drawControl);
 
+
+let inputElement = document.getElementById("coordinateDecimalPlaces");
+let decimalPlaces = parseFloat(inputElement.value);
+console.log(decimalPlaces);
+
+inputElement.addEventListener('change', function() {
+    let decimalPlaces = parseFloat(inputElement.value);
+    console.log(decimalPlaces);
+});
+// Function to round up a number to a specified number of decimal places
+function roundUp(num, decimalPlaces) {
+  var factor = Math.pow(10, decimalPlaces);
+  return Math.ceil(num * factor) / factor;
+}
+
+function roundDown(num, decimalPlaces) {
+  var factor = Math.pow(10, decimalPlaces);
+  return Math.floor(num * factor) / factor;
+}
+
 // Event listener for when a rectangle is created
 map.on(L.Draw.Event.CREATED, function (event) {
   var layer = event.layer;
   var bounds = layer.getBounds();
+  var decimalPlaces = parseFloat(inputElement.value);
 
   // Original coordinates with 6 decimal places
   var lon_min = bounds.getWest().toFixed(6);
@@ -145,10 +193,10 @@ map.on(L.Draw.Event.CREATED, function (event) {
   var lat_max = bounds.getNorth().toFixed(6);
 
   // Coordinates rounded up to 1 decimal place
-  var lon_min_rounded = roundDown(bounds.getWest(), 1).toFixed(1);
-  var lat_min_rounded = roundDown(bounds.getSouth(), 1).toFixed(1);
-  var lon_max_rounded = roundUp(bounds.getEast(), 1).toFixed(1);
-  var lat_max_rounded = roundUp(bounds.getNorth(), 1).toFixed(1);
+  var lon_min_rounded = roundDown(bounds.getWest(), decimalPlaces).toFixed(decimalPlaces);
+  var lat_min_rounded = roundDown(bounds.getSouth(), decimalPlaces).toFixed(decimalPlaces);
+  var lon_max_rounded = roundUp(bounds.getEast(), decimalPlaces).toFixed(decimalPlaces);
+  var lat_max_rounded = roundUp(bounds.getNorth(), decimalPlaces).toFixed(decimalPlaces);
 
   coordinatesText =
     "[" + lon_min + ", " + lat_min + ", " + lon_max + ", " + lat_max + "]";
@@ -164,27 +212,26 @@ map.on(L.Draw.Event.CREATED, function (event) {
     "]";
 
   // Output the coordinates
-  document.getElementById("coordinateText").innerHTML =
-    "<strong>Coordinates (WGS84):</strong> " + coordinatesText_roundup;
+  document.getElementById("coordinateText").innerHTML = coordinatesText_roundup;
 
   // Enable the copy button
   copyButton.disabled = false;
 
-  // Parse rounded coordinates
-  var rectBounds = [
+  var rectBoundsRound = [
     [parseFloat(lat_min_rounded), parseFloat(lon_min_rounded)], // Southwest corner
     [parseFloat(lat_max_rounded), parseFloat(lon_max_rounded)], // Northeast corner
   ];
 
   // Create a new rectangle with rounded coordinates
-  var rectangle = L.rectangle(rectBounds, {
+  var rectangleRound = L.rectangle(rectBoundsRound, {
     color: "#ff7800",
     weight: 1,
+    fillOpacity: 0.2,
   });
 
   // Add the rectangle to the map
   drawnItems.clearLayers(); // Clear previous rectangles
-  drawnItems.addLayer(rectangle);
+  drawnItems.addLayer(rectangleRound);
 });
 
 var copyButton = document.getElementById("copyButton");
@@ -213,25 +260,27 @@ copyButton.addEventListener("click", function () {
   document.body.removeChild(tempInput);
 });
 
-// Upload geojson file
-document
-  .getElementById("geojsonForm")
-  .addEventListener("submit", function (event) {
-    const fileInput = document.getElementById("geojsonFile");
-    const file = fileInput.files[0];
+var copyDynamicCoordinateButton = document.getElementById("copyDynamicCoordinateButton");
 
-    if (!file) {
-      alert("Please select a file to upload.");
-      event.preventDefault(); // Stop form submission
-      return;
-    }
+// // Upload geojson file
+// document
+//   .getElementById("geojsonForm")
+//   .addEventListener("submit", function (event) {
+//     const fileInput = document.getElementById("geojsonFile");
+//     const file = fileInput.files[0];
 
-    if (file.type !== "application/json" && !file.name.endsWith(".geojson")) {
-      alert("Only GeoJSON files are allowed.");
-      event.preventDefault(); // Stop form submission
-      return;
-    }
+//     if (!file) {
+//       alert("Please select a file to upload.");
+//       event.preventDefault(); // Stop form submission
+//       return;
+//     }
 
-    // Optionally, provide additional feedback
-    console.log("File is valid. Proceeding with upload.");
-  });
+//     if (file.type !== "application/json" && !file.name.endsWith(".geojson")) {
+//       alert("Only GeoJSON files are allowed.");
+//       event.preventDefault(); // Stop form submission
+//       return;
+//     }
+
+//     // Optionally, provide additional feedback
+//     console.log("File is valid. Proceeding with upload.");
+//   });

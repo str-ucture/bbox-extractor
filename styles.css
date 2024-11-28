@@ -46,8 +46,8 @@ body {
 .content {
     flex: 1;
     display: flex;
-    padding: 1rem;
-    gap: 2rem;
+    padding: 1.5rem;
+    gap: 1.5rem;
 }
 
 .map-container {
@@ -61,8 +61,7 @@ body {
     background: linear-gradient(45deg, #ddd, #ccc);
     border: 1px solid #bbb;
     width: 100%;
-    height: 750px;
-    max-height: 100vh;
+    height: 100%;
     position: relative;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -106,15 +105,30 @@ body {
 }
 
 #copyButton {
-    background-color: #007BFF;
+    background-color: #ff7800;
+    margin: 5px 0px;
 }
 
-.btn.geojson {
-    background-color: #4caf50;
+#copyDynamicCoordinateButton {
+    background-color: #007BFF;
+    margin: 5px 0px;
 }
 
 .btn:hover {
-    opacity: 0.9;
+    opacity: 0.8;
+}
+
+h3 {
+    display: flex;
+    gap: 2%;
+    margin: 5px 0px;
+}
+
+#coordinateDecimalPlaces {
+    flex-grow: 1;
+    width: auto;
+    text-align: right;
+    font-size: 0.8em
 }
 
 /* Footer */

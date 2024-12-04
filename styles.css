@@ -109,6 +109,12 @@ body {
     margin: 5px 0px;
 }
 
+#copyButtonStandard {
+    background-color: #ff7800;
+    margin: 5px 0px;
+}
+
+
 #copyDynamicCoordinateButton {
     background-color: #007BFF;
     margin: 5px 0px;

@@ -211,8 +211,20 @@ map.on(L.Draw.Event.CREATED, function (event) {
     lon_max_rounded +
     "]";
 
+  coordinatesText_roundupStandard =
+    "[" +
+    lon_min_rounded +
+    ", " +
+    lat_min_rounded +
+    ", " +
+    lon_max_rounded +
+    ", " +
+    lat_max_rounded +
+    "]";
+
   // Output the coordinates
   document.getElementById("coordinateText").innerHTML = coordinatesText_roundup;
+  document.getElementById("coordinateTextStandard").innerHTML = coordinatesText_roundupStandard;
 
   // Enable the copy button
   copyButton.disabled = false;
@@ -234,8 +246,9 @@ map.on(L.Draw.Event.CREATED, function (event) {
   drawnItems.addLayer(rectangleRound);
 });
 
-var copyButton = document.getElementById("copyButton");
 
+// BUTTON 1
+var copyButton = document.getElementById("copyButton");
 // Copy button click event
 copyButton.addEventListener("click", function () {
   // Create a temporary textarea to hold the text to copy
@@ -259,6 +272,33 @@ copyButton.addEventListener("click", function () {
   // Remove the temporary textarea
   document.body.removeChild(tempInput);
 });
+
+// BUTTON 2
+var copyButton = document.getElementById("copyButtonStandard");
+// Copy button click event
+copyButton.addEventListener("click", function () {
+  // Create a temporary textarea to hold the text to copy
+  var tempInput = document.createElement("textarea");
+  tempInput.value = coordinatesText_roundupStandard;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999); // For mobile devices
+
+  try {
+    var successful = document.execCommand("copy");
+    if (successful) {
+      alert("Coordinates copied to clipboard!");
+    } else {
+      alert("Failed to copy coordinates.");
+    }
+  } catch (err) {
+    alert("Browser does not support copying to clipboard.");
+  }
+
+  // Remove the temporary textarea
+  document.body.removeChild(tempInput);
+});
+
 
 var copyDynamicCoordinateButton = document.getElementById("copyDynamicCoordinateButton");
 

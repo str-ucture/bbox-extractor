@@ -39,9 +39,14 @@
                         value=1 min=0 max="13">
                 </h3>
                 <br>
-                <p><strong>Coordinates (WGS84)</strong>: </p>
-                <p id="coordinateText">[lon_min, lat_min, lon_max, lat_max]</p>
+                <p><strong>Coordinates (WGS84)</strong> (CDS) </p>
+                <p id="coordinateText">[lat_max, lon_min, lat_min, lon_max]</p>
                 <button class="btn" id="copyButton">Copy Coordinates</button>
+
+                <br>
+                <p><strong>Coordinates (WGS84)</strong> (Standard) </p>
+                <p id="coordinateTextStandard">[lon_min, lat_min, lon_max, lat_max]</p>
+                <button class="btn" id="copyButtonStandard">Copy Coordinates</button>
 
                 <!-- <h2>More Options</h2>
                 <h3>Upload Geojson File</h3>

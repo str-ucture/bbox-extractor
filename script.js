@@ -13,7 +13,7 @@ var esriWorldImagery = L.tileLayer(
 
 var tileLayers = {
   OSM: osm,
-  "ESRI World Imagery": esriWorldImagery,
+  // "ESRI World Imagery": esriWorldImagery,
 };
 
 var map = L.map("map", {
@@ -32,12 +32,11 @@ map.on("mousemove", function (e) {
   var lng = e.latlng.lng.toFixed(2);
   coordDiv.innerHTML = `Lat: ${lat}, Lng: ${lng}`;
 });
-// Create a new pane for the grid layer
-map.createPane("gridPane");
 
-map.getPane("gridPane").style.zIndex = 1000;
+// Variable to store the current zoom level
+let currentZoomLevel = map.getZoom(); // Initialize with the current zoom level
 
-// Custom grid layer to draw major and minor grids
+// Custom grid layer
 var GridLayer = L.GridLayer.extend({
   createTile: function (coords) {
     var tile = document.createElement("canvas");
@@ -47,83 +46,98 @@ var GridLayer = L.GridLayer.extend({
 
     var ctx = tile.getContext("2d");
 
-    // Major grid settings
-    var majorStep = 0.1;
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.lineWidth = 0.65;
-
+    // Grid toggle logic
     var tileBounds = this._tileCoordsToBounds(coords);
     var latRange = [tileBounds.getSouth(), tileBounds.getNorth()];
     var lngRange = [tileBounds.getWest(), tileBounds.getEast()];
 
+    // Major grid settings
+    var majorStep = 0.1;
+    var drawMajorGrid = currentZoomLevel > 6; // Only draw major grid if zoom > 6
+
     // Minor grid settings
     var minorStep = majorStep / 10;
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.3)"; // Lighter stroke for minor grids
-    ctx.lineWidth = 0.4;
+    var drawMinorGrid = currentZoomLevel > 8; // Only draw minor grid if zoom > 8
 
-    // Draw minor vertical lines (longitude)
-    for (
-      var lng = Math.ceil(lngRange[0] / minorStep) * minorStep;
-      lng < lngRange[1];
-      lng += minorStep
-    ) {
-      var x = ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * size.x;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, size.y);
-      ctx.stroke();
+    // Draw minor grid
+    if (drawMinorGrid) {
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+      ctx.lineWidth = 0.4;
+
+      // Draw minor vertical lines (longitude)
+      for (
+        var lng = Math.ceil(lngRange[0] / minorStep) * minorStep;
+        lng < lngRange[1];
+        lng += minorStep
+      ) {
+        var x = ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * size.x;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, size.y);
+        ctx.stroke();
+      }
+
+      // Draw minor horizontal lines (latitude)
+      for (
+        var lat = Math.ceil(latRange[0] / minorStep) * minorStep;
+        lat < latRange[1];
+        lat += minorStep
+      ) {
+        var y = ((latRange[1] - lat) / (latRange[1] - latRange[0])) * size.y;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(size.x, y);
+        ctx.stroke();
+      }
     }
 
-    // Draw minor horizontal lines (latitude)
-    for (
-      var lat = Math.ceil(latRange[0] / minorStep) * minorStep;
-      lat < latRange[1];
-      lat += minorStep
-    ) {
-      var y = ((latRange[1] - lat) / (latRange[1] - latRange[0])) * size.y;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(size.x, y);
-      ctx.stroke();
-    }
+    // Draw major grid
+    if (drawMajorGrid) {
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.lineWidth = 0.65;
 
-    // Major grid settings
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)"; // Darker stroke for major grids
-    ctx.lineWidth = 0.65;
+      // Draw major vertical lines
+      for (
+        var lng = Math.ceil(lngRange[0] / majorStep) * majorStep;
+        lng < lngRange[1];
+        lng += majorStep
+      ) {
+        var x = ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * size.x;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, size.y);
+        ctx.stroke();
+      }
 
-    // Draw major vertical lines (longitude)
-    for (
-      var lng = Math.ceil(lngRange[0] / majorStep) * majorStep;
-      lng < lngRange[1];
-      lng += majorStep
-    ) {
-      var x = ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * size.x;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, size.y);
-      ctx.stroke();
-    }
-
-    // Draw major horizontal lines (latitude)
-    for (
-      var lat = Math.ceil(latRange[0] / majorStep) * majorStep;
-      lat < latRange[1];
-      lat += majorStep
-    ) {
-      var y = ((latRange[1] - lat) / (latRange[1] - latRange[0])) * size.y;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(size.x, y);
-      ctx.stroke();
+      // Draw major horizontal lines
+      for (
+        var lat = Math.ceil(latRange[0] / majorStep) * majorStep;
+        lat < latRange[1];
+        lat += majorStep
+      ) {
+        var y = ((latRange[1] - lat) / (latRange[1] - latRange[0])) * size.y;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(size.x, y);
+        ctx.stroke();
+      }
     }
 
     return tile;
   },
 });
 
-// Assign the grid layer to the new pane
-var grid = new GridLayer({ pane: "gridPane" });
+var grid = new GridLayer();
 map.addLayer(grid);
+
+// Save zoom level to the variable on zoom change and refresh the grid
+map.on("zoomend", function () {
+  currentZoomLevel = map.getZoom();
+  console.log("Current zoom level:", currentZoomLevel);
+
+  // Redraw the grid to reflect the new zoom level
+  grid.redraw();
+});
 
 
 // Add GeoSearch control

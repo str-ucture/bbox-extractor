@@ -338,3 +338,83 @@ var copyDynamicCoordinateButton = document.getElementById("copyDynamicCoordinate
 //     // Optionally, provide additional feedback
 //     console.log("File is valid. Proceeding with upload.");
 //   });
+
+
+// Variable to store the GeoJSON of the drawn rectangle
+let currentGeoJSON = null;
+
+// Event listener for rectangle creation
+map.on(L.Draw.Event.CREATED, function (event) {
+  let layer = event.layer;
+  let bounds = layer.getBounds();
+
+  // Rounded coordinates
+  let lonMin = roundDown(bounds.getWest(), decimalPlaces);
+  let latMin = roundDown(bounds.getSouth(), decimalPlaces);
+  let lonMax = roundUp(bounds.getEast(), decimalPlaces);
+  let latMax = roundUp(bounds.getNorth(), decimalPlaces);
+
+  let rectBounds = [
+    [latMin, lonMin],
+    [latMax, lonMax],
+  ];
+
+  // Draw rectangle with rounded coordinates
+  let rectangle = L.rectangle(rectBounds, {
+    color: "#ff7800",
+    weight: 1,
+    fillOpacity: 0.2,
+  });
+
+  drawnItems.clearLayers();
+  drawnItems.addLayer(rectangle);
+
+  // Update the current GeoJSON
+  currentGeoJSON = rectangle.toGeoJSON();
+});
+
+
+// Add download GeoJSON functionality
+let downloadButton = document.getElementById("downloadGeojson");
+downloadButton.addEventListener("click", function () {
+  if (currentGeoJSON) {
+    let geoJSONString = JSON.stringify(currentGeoJSON, null, 2);
+
+    // Create a Blob object
+    let blob = new Blob([geoJSONString], { type: "application/json" });
+
+    // Use the File System Access API to show the Save As dialog
+    if (window.showSaveFilePicker) {
+      (async () => {
+        const fileHandle = await window.showSaveFilePicker({
+          suggestedName: "rectangle.geojson",
+          types: [
+            {
+              description: "GeoJSON File",
+              accept: { "application/json": [".geojson"] },
+            },
+          ],
+        });
+
+        const writableStream = await fileHandle.createWritable();
+        await writableStream.write(blob);
+        await writableStream.close();
+      })().catch((err) => {
+        console.error("Save As dialog failed", err);
+      });
+    } else {
+      // Fallback for browsers that don't support showSaveFilePicker
+      let url = URL.createObjectURL(blob);
+
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = "rectangle.geojson";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  } else {
+    alert("No rectangle drawn to save!");
+  }
+});

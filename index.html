@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch/dist/geosearch.css" />
+
+    <title>Bbox Extractor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Interactive Bounding Box Extractor</h1>
+            <nav class="nav">
+                <a href="#">Home</a>
+                <!-- <a href="#">Features</a> -->
+                <a href="#">Docs</a>
+                <!-- <a href="#">Support</a> -->
+            </nav>
+        </header>
+
+        <main class="content">
+            <div class="map-container">
+                <div id="map">
+                    <div id="leafletCoordinates">Lat: 47.70, Lon: 9.15</div>
+                </div>
+            </div>
+            <div class="controls">
+
+                <h2>Options:</h2>
+                <h3>Decimal Places:
+                    <input type="number" id="coordinateDecimalPlaces" name="coordinateDecimalPlaces" value=1 min=0
+                        max="13">
+                </h3>
+                <br>
+                <p><strong>Coordinates (WGS84)</strong> (CDS) </p>
+                <p id="coordinateText">[lat_max, lon_min, lat_min, lon_max]</p>
+                <button class="btn" id="copyButton">Copy Coordinates</button>
+
+                <br>
+                <p><strong>Coordinates (WGS84)</strong> (Standard) </p>
+                <p id="coordinateTextStandard">[lon_min, lat_min, lon_max, lat_max]</p>
+                <button class="btn" id="copyButtonStandard">Copy Coordinates</button>
+
+                <br>
+                <button class="btn" id="downloadGeojson">Download GeoJSON</button>
+
+<!-- 
+                <p>
+                    <strong>Enter EPSG Code:</strong>
+                    <input type="number" id="epsgCodeInput" name="epsgCodeInput" value="4328">
+                </p>
+                <p><strong>Converted Coordinates:</strong></p>
+                <p id="convertedCoordinates">[Converted Coordinates will be displayed here]</p>
+                <button class="btn" id="copyConvertedButton">Copy Converted Coordinates</button> -->
+
+                <!-- <h2>More Options</h2>
+                <h3>Upload Geojson File</h3>
+                <form id="geojsonForm" method="post" enctype="multipart/form-data">
+                    <input id="geojsonFile" name="file" type="file" accept=".geojson">
+                    <button id="uploadButton" type="submit">Upload</button>
+                </form> -->
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024. str.ucture GmbH, All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/leaflet-geosearch/dist/bundle.min.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
